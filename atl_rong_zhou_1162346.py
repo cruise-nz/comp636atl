@@ -8,36 +8,9 @@ from datetime import datetime, timedelta, date  # datetime module is required fo
 # Make the variables and function in atl_data.py available in this code (without needing 'atl_data.' prefix)
 from atl_data import customers,tours,unique_id,display_formatted_row
 from welcome_banner import create_welcome_banner
-from infer_command import infer
+from utils import *
 
-def calculate_age(birthdate):
-    """Calculate age from birthdate"""
-    today = date.today()
-    age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
-    return age
-
-
-def get_valid_date(prompt, future_allowed=False):
-    """Get and validate a date input"""
-    while True:
-        try:
-            date_str = input(prompt)
-            input_date = datetime.strptime(date_str, "%d/%m/%Y").date()
-
-            # Check if date is not in future (for birthdate)
-            if not future_allowed and input_date > date.today():
-                print("⛔Error: Date cannot be in the future.")
-                continue
-
-            # Check if date is not too far in past (for birthdate)
-            if not future_allowed and input_date < date.today() - timedelta(days=365 * 110):
-                print("⛔Error: Date cannot be more than 110 years ago.")
-                continue
-
-            return input_date
-        except ValueError:
-            print("⛔Invalid date format. Please use dd/mm/yyyy format.")
-
+# Define the functions for the menu options
 def list_all_customers(show_input=True):
     """
     Lists customer details.
@@ -222,9 +195,6 @@ def add_new_customer():
         if input("\n❓Add another customer? (y/n): ").lower() != 'y':
             break
 
-
-
-
 def list_all_destinations(show_input=True):
     """
     List all destinations that ATL Visit and the tours that visit them
@@ -296,5 +266,5 @@ while input_command != "X":
 
     print("")
 
-print("\n=== Thank you for using the AOTEAROA TOURS MANAGEMENT SYSTEM! ===\n")
+print("\n=== Thank you for using the AOTEAROA TOURS MANAGEMENT SYSTEM! BYE!===\n")
 

@@ -7,7 +7,7 @@ def create_welcome_banner():
     username = getpass.getuser()
     current_time = datetime.datetime.now()
     time_str = current_time.strftime('%I:%M %p')  # 12-hour format with AM/PM
-    date_str = current_time.strftime('%d/%B/%Y')  # Month Day, Year
+    date_str = current_time.strftime('%d/%m/%Y')  # day/month/year
 
     # Create personalized welcome message
     welcome_msg = f'Welcome, {username}!'
