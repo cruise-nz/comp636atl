@@ -1,0 +1,2 @@
+MAXIMAL_AGE_DAYS = 365 * 110
+NZ_DATE_FORMAT = "%d/%m/%Y"

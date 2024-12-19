@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, date  # datetime module is required fo
 
 # Make the variables and function in atl_data.py available in this code (without needing 'atl_data.' prefix)
 from atl_data import customers,tours,unique_id,display_formatted_row
+from constants import MAXIMAL_AGE_DAYS, NZ_DATE_FORMAT
 from welcome_banner import create_welcome_banner
 from utils import *
 
@@ -21,7 +22,7 @@ def list_all_customers(show_input=True):
         id = customer[0]
         fname = customer[1]
         famname = customer[2]
-        birthdate = customer[3].strftime("%d/%m/%Y")
+        birthdate = customer[3].strftime(NZ_DATE_FORMAT)
         email = customer[4]
 
         display_formatted_row([id,fname,famname,birthdate,email],format_str)     # Use the display_formatted_row() function to display each row with consistent spacing
@@ -60,7 +61,7 @@ def list_customers_by_tourgroup(show_input=True):
             # Display customers
             for customer in group_customers:
                 id, fname, famname, birthdate, email = customer
-                birthdate_str = birthdate.strftime("%d/%m/%Y")
+                birthdate_str = birthdate.strftime(NZ_DATE_FORMAT)
                 display_formatted_row([id, fname, famname, birthdate_str, email], format_str)
 
     if show_input:
@@ -90,10 +91,17 @@ def list_tour_details(show_input=True):
         input("\nPress Enter to continue.")
 
 def add_customer_to_tourgroup():
+    """Add a customer to a tour group
+    call process:
+    1. Display available customers
+    2. Get valid customer ID - Customer ID must exist
+    3. Show available tours
+    4. Select tour and validate age restrictions - Tour must exist
+    5. Select tour date - Date must be valid
+    6. Add customer if not already in group
     """
-    Choose a customer, then a tour & group, add customers to tour groups only if they meet the minimum age requirement """
     # Display available customers
-    print("\n=== Available Customers ===")
+    print("\n=== Adding customer to tour, select available customers below to start ===")
     list_all_customers(False)
 
     # Get customer ID
@@ -108,7 +116,7 @@ def add_customer_to_tourgroup():
             print("Please enter a valid number.")
 
     # Display available tours
-    print("\n=== Available Tours ===")
+    print("\n=== Choose one available tours ===")
     list_tour_details(False)
 
     # Get tour name
@@ -129,12 +137,12 @@ def add_customer_to_tourgroup():
         return
 
     # Display available dates
-    print("\n=== Available dates ===")
+    print("\n=== Choose one available dates ===")
     available_dates = sorted(tours[tour_name]["groups"].keys())
     for i, tour_date in enumerate(available_dates, 1):
-        print(f"{i}. {tour_date.strftime('%d/%m/%Y')}")
+        print(f"{i}. {tour_date.strftime(NZ_DATE_FORMAT)}")
 
-    # Get tour date
+    # list available date for selection
     while True:
         try:
             date_index = int(input("Select date (enter number): ")) - 1
@@ -148,7 +156,7 @@ def add_customer_to_tourgroup():
     # Add customer to tour group
     if customer_id not in tours[tour_name]["groups"][selected_date]:
         tours[tour_name]["groups"][selected_date].append(customer_id)
-        print(f"\n✅Success! Customer[{customer_id}] added to {tour_name} tour on {selected_date.strftime('%d/%m/%Y')}")
+        print(f"\n✅Success! Customer[{customer_id}] added to {tour_name} tour on {selected_date.strftime(NZ_DATE_FORMAT)}")
     else:
         print(f"\nCustomer[{customer_id}] is already in this tour group.")
 
@@ -176,12 +184,33 @@ def add_new_customer():
             print("Family name is required.")
 
         # Get birthdate
-        birth_date = get_valid_date("Enter birth date (e.g., 12/02/1996): ")
+        birth_date = None
+        while True:
+            try:
+                date_str = input("Enter birth date (e.g., 12/02/1996): ")
+                birth_date = datetime.strptime(date_str, NZ_DATE_FORMAT).date()
+
+                # Check if date is not in future (for birthdate)
+                if birth_date > date.today():
+                    print("⛔Error: Birth date cannot be in the future.")
+                    continue
+
+                # Check if date is not too far in past (for birthdate)
+                if birth_date < date.today() - timedelta(days=MAXIMAL_AGE_DAYS):
+                    print("⛔Error: Birth date cannot be more than 110 years ago.")
+                    continue
+                
+                if birth_date is None:
+                    continue
+                else:
+                    break
+            except ValueError:
+                print("⛔Invalid date format. Please use dd/mm/yyyy format.")
 
         # Get email
         while True:
             email = input("Enter email address: ").strip()
-            if "@" in email and "." in email:
+            if validate_email(email):
                 break
             print("(つ╥﹏╥)つSorry, please enter a valid email address.")
 
