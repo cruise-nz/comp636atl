@@ -7,9 +7,70 @@ from datetime import datetime, timedelta, date  # datetime module is required fo
 
 # Make the variables and function in atl_data.py available in this code (without needing 'atl_data.' prefix)
 from atl_data import customers,tours,unique_id,display_formatted_row
-from constants import MAXIMAL_AGE_DAYS, NZ_DATE_FORMAT
-from welcome_banner import create_welcome_banner
-from utils import *
+import getpass
+import difflib
+
+
+# Constants defined for the program
+MAXIMAL_AGE_DAYS = 365 * 110
+NZ_DATE_FORMAT = "%d/%m/%Y"
+# helper function start
+def infer(user_input):
+    """Infer the closest valid command based on user input."""
+    valid_commands = ['1', '2', '3', '4', '5', '6', 'X']
+    # the n=1 argument returns the closest match only
+    closest_match = difflib.get_close_matches(user_input, valid_commands, n=1)
+    return closest_match[0] if closest_match else ''
+
+
+def calculate_age(birthdate):
+    """Calculate age from birthdate"""
+    today = date.today()
+    age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    return age
+
+
+def validate_email(email):
+    """email validation with regex"""
+    import re
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def create_welcome_banner():
+    # Get current username and time
+    username = getpass.getuser()
+    current_time = datetime.now()
+    time_str = current_time.strftime('%I:%M %p')  # 12-hour format with AM/PM
+    date_str = current_time.strftime('%d/%m/%Y')  # day/month/year
+
+    # Create personalized welcome message
+    welcome_msg = f'Welcome, {username}!'
+    time_msg = f'Current Time: {time_str}'
+    date_msg = f'Date: {date_str}'
+
+    # Calculate padding for centering messages
+    width = 60
+    welcome_padding = ' ' * ((width - len(welcome_msg)) // 2)
+    time_padding = ' ' * ((width - len(time_msg)) // 2)
+    date_padding = ' ' * ((width - len(date_msg)) // 2)
+
+    banner = f'''
+    .----------------------------------------------------------------.
+      .-\'=.              .---.              .----.            .-\'-.
+   .\'  .\'\'\''._.--._____.-'     '-._____.-'       '-.____.-'.\'\'\''.  \'.
+   |  /                                                           \\  |
+   | |         AOTEAROA TOURS MANAGEMENT SYSTEM                   | |
+   | |                                                           | |
+   | |{welcome_padding}{welcome_msg}{welcome_padding}| |
+   | |{time_padding}{time_msg}{time_padding}| |
+   | |{date_padding}{date_msg}{date_padding}| |
+   |  \\                                                           /  |
+    \'._\'.____________________________________________________.\'.\'
+        '----------------------------------------------------'
+'''
+    return banner
+# helper function end
+
 
 # Define the functions for the menu options
 def list_all_customers(show_input=True):
